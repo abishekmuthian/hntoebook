@@ -1,0 +1,15 @@
+.pagetop, .subtext, form, .votearrow, .reply {
+    display: none;
+}
+
+.storylink {
+    font-size: 24px;
+}
+
+.yclinks::after {
+    position: relative;
+    top: 45px;
+    right: 250px;
+    content: 'Formatted by HN to E-Book';
+    color: #212121;
+}
