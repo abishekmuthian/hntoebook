@@ -32,7 +32,7 @@ Hence I've stripped down HN to Kindle code to enable local transfer to any e-boo
 
 #### Operating System
 1. Linux amd64 (Tested)
-2. Linux Arm64 (Not tested)
+2. Linux arm64 (Not tested)
 3. darwin amd64 (Not tested)
 4. darwin arm64 (Not tested)
 5. windows amd64 (Not tested)
