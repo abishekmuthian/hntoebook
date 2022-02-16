@@ -11,6 +11,21 @@ import (
 	"os"
 )
 
+func OperationsMode(mobiPath string) {
+	fmt.Println("Entering operations mode")
+
+	fmt.Println("Creating temporary directory for storing .pdf files")
+	dir, err := ioutil.TempDir("", "hn")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer os.Remove(dir)
+
+	fmt.Println("Temporary directory name:", dir)
+
+	operations.UpdateStories(dir+"/", mobiPath)
+}
+
 func main() {
 	var mobiPath string
 
@@ -114,19 +129,4 @@ func main() {
 		}
 
 	}
-}
-
-func OperationsMode(mobiPath string) {
-	fmt.Println("Entering operations mode")
-
-	fmt.Println("Creating temporary directory for storing .pdf files")
-	dir, err := ioutil.TempDir("", "hn")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer os.Remove(dir)
-
-	fmt.Println("Temporary directory name:", dir)
-
-	operations.UpdateStories(dir+"/", mobiPath)
 }
