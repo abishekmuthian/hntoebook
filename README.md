@@ -24,7 +24,7 @@ Hence I've stripped down HN to Kindle code to enable local transfer to any e-boo
 6. Store the item id in the K,V database to prevent duplicates.
 
 ### Requirements
-1. [WKhtmlTopdf](https://wkhtmltopdf.org/downloads.html).
+1. [WKhtmlTopdf](https://wkhtmltopdf.org/downloads.html)
 2. [Calibre CLI](https://calibre-ebook.com/download)
 3. [hntoebook](https://github.com/abishekmuthian/hntoebook/releases)
 
