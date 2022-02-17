@@ -53,11 +53,20 @@ Local file transfer is used instead of Email.
 #### Send HN item to Kindle
 Individuals HN item (Story or Comment) can be sent to the e-book reader.
 
-#### Filter
-Filtering keywords is not implemented as it requires python server for classifier. If there's enough interest for the feature then I will include it in the project.
+#### Category Filter
+Filtering is not implemented as it requires python server for classifier with large sized models. If there's enough interest for the feature then I will include it in the project.
 
 #### Misc
 No web server, Relational database, Concurrency etc. as there's no need for user accounts or subscriptions.
+
+### Troubleshooting
+
+#### Errors with mobiPath
+Make sure that the path for .mobi files on E-Reader ends with a trailing slash / .
+
+#### Database errors
+Delete the db folder and start again. If you were using < v0.0.3 and upgraded to v0.0.3 then the db folder needs to be deleted regardless of any error as v0.0.3 uses new database.
+
 
 ### License
 

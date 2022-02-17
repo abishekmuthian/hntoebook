@@ -3,7 +3,7 @@ package operations
 import (
 	"context"
 	"fmt"
-	"git.mills.io/prologic/bitcask"
+	"github.com/dgraph-io/badger/v3"
 	"github.com/hoenn/go-hn/pkg/hnapi"
 	"hntoebook/stories"
 	"log"
@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-func PDFToMobiGenerator(story *stories.Story, storyItem *hnapi.Story, commentItem *hnapi.Comment, pdfPath string, mobiPath string) {
+func PDFToMobiGenerator(db *badger.DB, story *stories.Story, storyItem *hnapi.Story, commentItem *hnapi.Comment, pdfPath string, mobiPath string) {
 
 	var out []byte
 	var err error
@@ -66,14 +66,13 @@ func PDFToMobiGenerator(story *stories.Story, storyItem *hnapi.Story, commentIte
 	output := string(out[:])
 	fmt.Println(output)
 
-	db, err := bitcask.Open("db")
+	err = db.Update(func(txn *badger.Txn) error {
+		err := txn.Set([]byte(strconv.Itoa(story.Id)), []byte("true"))
+		return err
+	})
 	if err != nil {
-		log.Fatal("Error opening the db", err)
+		log.Fatal(err)
 	}
-	err = db.Put([]byte(strconv.Itoa(story.Id)), []byte("True"))
-	db.Close()
-	if err != nil {
-		log.Fatal("Error storing the item id in the db")
-	}
+
 	fmt.Println("Stored item id for preventing duplicates")
 }

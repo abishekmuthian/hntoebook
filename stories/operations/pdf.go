@@ -2,13 +2,14 @@ package operations
 
 import (
 	wkhtml "github.com/SebastiaanKlippert/go-wkhtmltopdf"
+	"github.com/dgraph-io/badger/v3"
 	"github.com/hoenn/go-hn/pkg/hnapi"
 	"hntoebook/stories"
 	"log"
 	"strconv"
 )
 
-func HTMLtoPDFGenerator(story *stories.Story, storyItem *hnapi.Story, commentItem *hnapi.Comment, pdfPath string, mobiPath string) {
+func HTMLtoPDFGenerator(db *badger.DB, story *stories.Story, storyItem *hnapi.Story, commentItem *hnapi.Comment, pdfPath string, mobiPath string) {
 	// Create new PDF generator
 	pdfg, err := wkhtml.NewPDFGenerator()
 	if err != nil {
@@ -75,5 +76,5 @@ func HTMLtoPDFGenerator(story *stories.Story, storyItem *hnapi.Story, commentIte
 
 	log.Println("PDF Generator, Creating pdf file: Success")
 
-	PDFToMobiGenerator(story, storyItem, commentItem, pdfPath, mobiPath)
+	PDFToMobiGenerator(db, story, storyItem, commentItem, pdfPath, mobiPath)
 }

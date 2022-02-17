@@ -3,7 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"git.mills.io/prologic/bitcask"
+	"github.com/dgraph-io/badger/v3"
 	"github.com/hoenn/go-hn/pkg/hnapi"
 	"hntoebook/stories/operations"
 	"io/ioutil"
@@ -11,65 +11,37 @@ import (
 	"os"
 )
 
-func OperationsMode(mobiPath string) {
-	fmt.Println("Entering operations mode")
-
-	fmt.Println("Creating temporary directory for storing .pdf files")
-	dir, err := ioutil.TempDir("", "hn")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer os.Remove(dir)
-
-	fmt.Println("Temporary directory name:", dir)
-
-	operations.UpdateStories(dir+"/", mobiPath)
-}
-
-func main() {
+func OperationsMode(db *badger.DB, mode string) {
 	var mobiPath string
 
-	fmt.Println("***HN to E-book***")
+	fmt.Println("Entering operations mode")
 
-	args := os.Args[1:]
-	if len(args) > 0 {
-		switch args[0] {
-		case "-c":
-			fmt.Println("Entering config mode")
+	err := db.View(func(txn *badger.Txn) error {
+		item, err := txn.Get([]byte("mobiPath"))
 
-			fmt.Println("Enter a path for storing .mobi files on the e-reader e.g. /run/media/username/Kindle/documents/Downloads/hn/ :")
-			scanner := bufio.NewScanner(os.Stdin)
-			scanner.Scan()
-			if scanner.Err() != nil {
-				log.Fatalln("Error in getting the path for storing the ebook")
-			} else {
-				mobiPath = scanner.Text()
+		if err != nil {
+			log.Fatalln("Error accessing db for mobiPath, Did you set the config using -c?", err)
+		} else {
+
+			err := item.Value(func(val []byte) error {
+				// This func with val would only be called if item.Value encounters no error.
+
+				// Accessing val here is valid.
+				fmt.Printf("The answer is: %s\n", val)
+
+				// Copying or parsing val is valid.
+				mobiPath = string(append([]byte{}, val...))
+
+				return nil
+			})
+
+			if err != nil {
+				log.Fatalln("Item not found in the database", err)
 			}
 
-			db, err := bitcask.Open("db")
-			if err != nil {
-				fmt.Println("Error opening db ", err)
-			}
-			db.Put([]byte("mobiPath"), []byte(mobiPath))
-			db.Close()
-			fmt.Println("Stored mobiPath for future operations")
-
-			OperationsMode(mobiPath)
-			break
-		case "-i":
-			fmt.Println("Entering item mode")
-
-			db, err := bitcask.Open("db")
-			if err != nil {
-				fmt.Println("Error opening db ", err)
-			}
-			mobiPath, err := db.Get([]byte("mobiPath"))
-			db.Close()
-			if err != nil {
-				log.Fatalln("Error accessing db for mobiPath, Did you set the config using -c?")
-			} else {
+			switch mode {
+			case "item":
 				fmt.Println("Enter the HN story or comment item id:")
-
 				var itemId string
 
 				scanner := bufio.NewScanner(os.Stdin)
@@ -93,7 +65,6 @@ func main() {
 				if err != nil {
 					log.Fatal(err)
 				}
-				defer os.Remove(dir)
 
 				fmt.Println("Temporary directory name:", dir)
 
@@ -101,32 +72,84 @@ func main() {
 				case *hnapi.Story:
 					fmt.Println("Found HN story")
 					storyItem := item.(*hnapi.Story)
-					operations.HTMLtoPDFGenerator(nil, storyItem, nil, dir+"/", string(mobiPath))
-
+					operations.HTMLtoPDFGenerator(db, nil, storyItem, nil, dir+"/", string(mobiPath))
+					break
 				case *hnapi.Comment:
 					fmt.Println("Found HN comment")
 					commentItem := item.(*hnapi.Comment)
-					operations.HTMLtoPDFGenerator(nil, nil, commentItem, dir+"/", string(mobiPath))
-
+					operations.HTMLtoPDFGenerator(db, nil, nil, commentItem, dir+"/", string(mobiPath))
+					break
 				}
+				os.Remove(dir)
+				break
+			default:
+				fmt.Println("Creating temporary directory for storing .pdf files")
+				dir, err := ioutil.TempDir("", "hn")
+				if err != nil {
+					log.Fatal(err)
+				}
+
+				fmt.Println("Temporary directory name:", dir)
+
+				operations.UpdateStories(db, dir+"/", mobiPath)
+				os.Remove(dir)
+				break
 			}
+
+		}
+		return nil
+	})
+
+	if err != nil {
+		log.Fatalln("Db couldn't be viewed", err)
+	}
+
+}
+
+func main() {
+	var mobiPath string
+
+	fmt.Println("***HN to E-book***")
+
+	db, err := badger.Open(badger.DefaultOptions("db"))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	args := os.Args[1:]
+	if len(args) > 0 {
+		switch args[0] {
+		case "-c":
+			fmt.Println("Entering config mode")
+
+			fmt.Println("Enter a path for storing .mobi files on the e-reader e.g. /run/media/username/Kindle/documents/Downloads/hn/ :")
+			scanner := bufio.NewScanner(os.Stdin)
+			scanner.Scan()
+			if scanner.Err() != nil {
+				log.Fatalln("Error in getting the path for storing the ebook")
+			} else {
+				mobiPath = scanner.Text()
+			}
+			err = db.Update(func(txn *badger.Txn) error {
+				err := txn.Set([]byte("mobiPath"), []byte(mobiPath))
+				return err
+			})
+			if err != nil {
+				log.Fatal(err)
+			}
+			fmt.Println("Stored mobiPath for future operations")
+
+			OperationsMode(db, "default")
+			break
+		case "-i":
+			fmt.Println("Entering item mode")
+			OperationsMode(db, "item")
 		default:
 			log.Fatalln("Invalid argument, Use -c for config mode (or) -i for item mode")
 		}
 	} else {
-		db, _ := bitcask.Open("db")
-		if db.Has([]byte("mobiPath")) {
-			mobiPath, err := db.Get([]byte("mobiPath"))
-			if err != nil {
-				db.Close()
-				log.Fatalln("Error accessing db for mobiPath, Did you set the config using -c?")
-			} else {
-				OperationsMode(string(mobiPath))
-			}
-		} else {
-			db.Close()
-			log.Fatalln("Error accessing db for mobiPath, Did you set the config using -c?")
-		}
-
+		OperationsMode(db, "default")
 	}
+
+	db.Close()
 }
