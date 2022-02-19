@@ -1,0 +1,6 @@
+uvicorn
+torch
+fastapi
+pydantic
+typing
+transformers

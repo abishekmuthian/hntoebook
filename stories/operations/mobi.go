@@ -23,7 +23,7 @@ func PDFToMobiGenerator(db *badger.DB, story *stories.Story, storyItem *hnapi.St
 	defer cancel() // The cancel should be deferred so resources are cleaned up
 
 	if story != nil {
-		out, err = exec.CommandContext(ctx, "ebook-convert", pdfPath+strconv.Itoa(story.Id)+".pdf", mobiPath+strconv.Itoa(story.Id)+".mobi", "--authors=HN to Kindle", "--remove-first-image", "--title="+strings.ReplaceAll(story.Title, `"`, `\"`)).Output()
+		out, err = exec.CommandContext(ctx, "ebook-convert", pdfPath+strconv.Itoa(story.Id)+".pdf", mobiPath+strconv.Itoa(story.Id)+".mobi", "--authors=HN to Kindle", "--remove-first-image", "--title="+strings.ReplaceAll(story.Title, `"`, `\"`)).CombinedOutput()
 
 		// if there is an error with our execution
 		// handle it here
@@ -32,7 +32,7 @@ func PDFToMobiGenerator(db *badger.DB, story *stories.Story, storyItem *hnapi.St
 			return
 		}
 	} else if storyItem != nil {
-		out, err = exec.CommandContext(ctx, "ebook-convert", pdfPath+strconv.Itoa(storyItem.ID)+".pdf", mobiPath+strconv.Itoa(storyItem.ID)+".mobi", "--authors=HN to Kindle", "--remove-first-image", "--title="+strings.ReplaceAll(storyItem.Title, `"`, `\"`)).Output()
+		out, err = exec.CommandContext(ctx, "ebook-convert", pdfPath+strconv.Itoa(storyItem.ID)+".pdf", mobiPath+strconv.Itoa(storyItem.ID)+".mobi", "--authors=HN to Kindle", "--remove-first-image", "--title="+strings.ReplaceAll(storyItem.Title, `"`, `\"`)).CombinedOutput()
 
 		// if there is an error with our execution
 		// handle it here
@@ -41,7 +41,7 @@ func PDFToMobiGenerator(db *badger.DB, story *stories.Story, storyItem *hnapi.St
 			return
 		}
 	} else if commentItem != nil {
-		out, err = exec.CommandContext(ctx, "ebook-convert", pdfPath+strconv.Itoa(commentItem.ID)+".pdf", mobiPath+strconv.Itoa(commentItem.ID)+".mobi", "--authors=HN to Kindle", "--remove-first-image", "--title="+strings.ReplaceAll("Comment by "+commentItem.By, `"`, `\"`)).Output()
+		out, err = exec.CommandContext(ctx, "ebook-convert", pdfPath+strconv.Itoa(commentItem.ID)+".pdf", mobiPath+strconv.Itoa(commentItem.ID)+".mobi", "--authors=HN to Kindle", "--remove-first-image", "--title="+strings.ReplaceAll("Comment by "+commentItem.By, `"`, `\"`)).CombinedOutput()
 
 		// if there is an error with our execution
 		// handle it here
@@ -52,7 +52,7 @@ func PDFToMobiGenerator(db *badger.DB, story *stories.Story, storyItem *hnapi.St
 	}
 
 	// We want to check the context error to see if the timeout was executed.
-	// The error returned by cmd.Output() will be OS specific based on what
+	// The error returned by cmd.CombinedOutput() will be OS specific based on what
 	// happens when a process is killed.
 	if ctx.Err() == context.DeadlineExceeded {
 		log.Println("Command timed out")
