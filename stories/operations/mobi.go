@@ -67,7 +67,10 @@ func PDFToMobiGenerator(db *badger.DB, story *stories.Story, storyItem *hnapi.St
 	fmt.Println(output)
 
 	err = db.Update(func(txn *badger.Txn) error {
-		err := txn.Set([]byte(strconv.Itoa(story.Id)), []byte("true"))
+		var err error
+		if story != nil {
+			err = txn.Set([]byte(strconv.Itoa(story.Id)), []byte("true"))
+		}
 		return err
 	})
 	if err != nil {

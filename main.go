@@ -41,7 +41,7 @@ func OperationsMode(db *badger.DB, mode string) {
 		item, err := txn.Get([]byte("mobiPath"))
 
 		if err != nil {
-			log.Fatalln("Error accessing db for mobiPath, Did you set the config using -c?", err)
+			log.Fatalln("Error accessing mobiPath, Did you set the config using -c?ing db for mobiPath, Did you set the config using -c?", err)
 		} else {
 
 			err := item.Value(func(val []byte) error {
@@ -300,5 +300,5 @@ func main() {
 		OperationsMode(db, "default")
 	}
 
-	db.Close()
+	defer db.Close()
 }
