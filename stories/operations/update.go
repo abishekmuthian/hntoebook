@@ -122,7 +122,7 @@ func UpdateStories(db *badger.DB, pdfPath string, mobiPath string, categories []
 					log.Println("Story Update, Top story comment threshold not met or Story not older than 9 hours or Story older than 24 hours")
 					return nil
 				}
-				log.Println("Time difference of the story: ", time.Now().Sub(time.Unix(topStory.Time, 0)).Hours())
+				log.Println("Time difference of the story: ", time.Since(time.Unix(topStory.Time, 0)).Hours())
 
 				story := stories.Story{
 					Id:    topStory.ID,
@@ -155,8 +155,8 @@ func UpdateStories(db *badger.DB, pdfPath string, mobiPath string, categories []
 // - Has at least 20 comments.
 // - Top comment on the story is no more than 2 hours old.
 func includeAsTopStory(topStory *hnapi.Story, topComment *hnapi.Comment) bool {
-	return time.Now().Sub(time.Unix(topStory.Time, 0)).Hours() > 9 &&
-		time.Now().Sub(time.Unix(topStory.Time, 0)).Hours() < 24 &&
+	return time.Since(time.Unix(topStory.Time, 0)).Hours() > 9 &&
+		time.Since(time.Unix(topStory.Time, 0)).Hours() < 24 &&
 		topStory.Descendants > 20 &&
-		time.Now().Sub(time.Unix(topComment.Time, 0)).Hours() > 2
+		time.Since(time.Unix(topComment.Time, 0)).Hours() > 2
 }
