@@ -3,14 +3,15 @@ package operations
 import (
 	"context"
 	"fmt"
-	"github.com/dgraph-io/badger/v3"
-	"github.com/hoenn/go-hn/pkg/hnapi"
 	"hntoebook/stories"
 	"log"
 	"os/exec"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/dgraph-io/badger/v3"
+	"github.com/hoenn/go-hn/pkg/hnapi"
 )
 
 func PDFToMobiGenerator(db *badger.DB, story *stories.Story, storyItem *hnapi.Story, commentItem *hnapi.Comment, pdfPath string, mobiPath string) {
@@ -24,31 +25,15 @@ func PDFToMobiGenerator(db *badger.DB, story *stories.Story, storyItem *hnapi.St
 
 	if story != nil {
 		out, err = exec.CommandContext(ctx, "ebook-convert", pdfPath+strconv.Itoa(story.Id)+".pdf", mobiPath+strconv.Itoa(story.Id)+".mobi", "--authors=HN to Kindle", "--remove-first-image", "--title="+strings.ReplaceAll(story.Title, `"`, `\"`)).CombinedOutput()
-
-		// if there is an error with our execution
-		// handle it here
-		if err != nil {
-			log.Println("Mobi, Error executing command check the mobiPath ", err)
-			return
-		}
 	} else if storyItem != nil {
 		out, err = exec.CommandContext(ctx, "ebook-convert", pdfPath+strconv.Itoa(storyItem.ID)+".pdf", mobiPath+strconv.Itoa(storyItem.ID)+".mobi", "--authors=HN to Kindle", "--remove-first-image", "--title="+strings.ReplaceAll(storyItem.Title, `"`, `\"`)).CombinedOutput()
-
-		// if there is an error with our execution
-		// handle it here
-		if err != nil {
-			log.Println("Mobi, Error executing command check the mobiPath ", err)
-			return
-		}
 	} else if commentItem != nil {
 		out, err = exec.CommandContext(ctx, "ebook-convert", pdfPath+strconv.Itoa(commentItem.ID)+".pdf", mobiPath+strconv.Itoa(commentItem.ID)+".mobi", "--authors=HN to Kindle", "--remove-first-image", "--title="+strings.ReplaceAll("Comment by "+commentItem.By, `"`, `\"`)).CombinedOutput()
+	}
 
-		// if there is an error with our execution
-		// handle it here
-		if err != nil {
-			log.Println("Mobi, Error executing command check the mobiPath ", err)
-			return
-		}
+	if err != nil {
+		log.Println("Mobi, Error executing command check the mobiPath", err)
+		return
 	}
 
 	// We want to check the context error to see if the timeout was executed.
