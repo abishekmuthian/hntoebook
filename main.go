@@ -88,17 +88,13 @@ func OperationsMode(db *badger.DB, mode string) {
 
 			fmt.Println("Temporary directory name:", dir)
 
-			switch item.(type) {
+			switch hnItem := item.(type) {
 			case *hnapi.Story:
 				fmt.Println("Found HN story")
-				storyItem := item.(*hnapi.Story)
-				operations.HTMLtoPDFGenerator(db, nil, storyItem, nil, dir+"/", string(mobiPath))
-				break
+				operations.HTMLtoPDFGenerator(db, nil, hnItem, nil, dir+"/", string(mobiPath))
 			case *hnapi.Comment:
 				fmt.Println("Found HN comment")
-				commentItem := item.(*hnapi.Comment)
-				operations.HTMLtoPDFGenerator(db, nil, nil, commentItem, dir+"/", string(mobiPath))
-				break
+				operations.HTMLtoPDFGenerator(db, nil, nil, hnItem, dir+"/", string(mobiPath))
 			}
 			os.Remove(dir)
 			break
