@@ -17,6 +17,8 @@ import (
 	"github.com/hoenn/go-hn/pkg/hnapi"
 )
 
+var validCategoryParam = regexp.MustCompile(`^(\w+ *\w*)+( *, *\w* *\w*)*$`)
+
 func startClassifierServer(ctx context.Context) {
 	cmd := exec.CommandContext(ctx, "uvicorn", "main:app")
 	err := cmd.Start()
