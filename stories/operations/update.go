@@ -22,9 +22,6 @@ func categoryFilter(story *stories.Story, categories []string) bool {
 		log.Fatalln("Update, User has no categories")
 	}
 
-	var labels []string
-	labels = append(labels, strings.Join(categories, ","))
-
 	type bertRequest struct {
 		Text   string   `json:"text"`
 		Labels []string `json:"labels"`
