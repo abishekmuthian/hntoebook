@@ -99,7 +99,6 @@ func OperationsMode(db *badger.DB, mode string) {
 				operations.HTMLtoPDFGenerator(db, nil, nil, hnItem, dir+"/", string(mobiPath))
 			}
 			os.Remove(dir)
-			break
 		case "filter":
 
 			var wg sync.WaitGroup
@@ -129,8 +128,7 @@ func OperationsMode(db *badger.DB, mode string) {
 				log.Fatalln("No categories were entered, try again")
 			}
 
-			re := regexp.MustCompile("^(\\w+ *\\w*)+( *, *\\w* *\\w*)*$")
-			if !(re.MatchString(categoryParam)) {
+			if !(validCategoryParam.MatchString(categoryParam)) {
 				log.Fatalln("Invalid category entered, Enter categories separated by a comma, e.g. Tech,Climate,Gaming:")
 			}
 
@@ -163,7 +161,6 @@ func OperationsMode(db *badger.DB, mode string) {
 			// the child process has stopped and the call to cmd.Wait has returned.
 			// This prevents main() exiting prematurely.
 			wg.Wait()
-			break
 
 		default:
 			log.Println("Creating temporary directory for storing .pdf files")
@@ -176,7 +173,6 @@ func OperationsMode(db *badger.DB, mode string) {
 
 			operations.UpdateStories(db, dir+"/", mobiPath, nil)
 			os.Remove(dir)
-			break
 		}
 
 		return nil
@@ -197,6 +193,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer db.Close()
 
 	args := os.Args[1:]
 	if len(args) > 0 {
@@ -279,7 +276,6 @@ func main() {
 			}
 
 			log.Println("Configuration done, You can now use ./hntoebook")
-			break
 		case "-i":
 			log.Println("Entering item mode")
 			OperationsMode(db, "item")
@@ -292,6 +288,4 @@ func main() {
 	} else {
 		OperationsMode(db, "default")
 	}
-
-	defer db.Close()
 }

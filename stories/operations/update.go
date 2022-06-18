@@ -10,7 +10,6 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/dgraph-io/badger/v3"
@@ -57,9 +56,12 @@ func categoryFilter(story *stories.Story, categories []string) bool {
 	}
 
 	res := bertResponse{}
-	json.Unmarshal(body, &res)
+	err = json.Unmarshal(body, &res)
+	if err != nil {
+		log.Fatalln("Bert, Error unmarshalling json", err)
+	}
 
-	log.Println(fmt.Sprintf("Bert, Title: %s", story.Title))
+	log.Printf("Bert, Title: %s\n", story.Title)
 
 	for i, score := range res.Scores {
 		fmt.Printf("Bert, Label: %s, Score: %f\n", res.Labels[i], res.Scores[i])
