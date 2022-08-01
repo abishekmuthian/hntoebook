@@ -1,12 +1,13 @@
 package operations
 
 import (
-	wkhtml "github.com/SebastiaanKlippert/go-wkhtmltopdf"
-	"github.com/dgraph-io/badger/v3"
-	"github.com/hoenn/go-hn/pkg/hnapi"
 	"hntoebook/stories"
 	"log"
 	"strconv"
+
+	wkhtml "github.com/SebastiaanKlippert/go-wkhtmltopdf"
+	"github.com/dgraph-io/badger/v3"
+	"github.com/hoenn/go-hn/pkg/hnapi"
 )
 
 func HTMLtoPDFGenerator(db *badger.DB, story *stories.Story, storyItem *hnapi.Story, commentItem *hnapi.Comment, pdfPath string, mobiPath string) {
@@ -56,22 +57,15 @@ func HTMLtoPDFGenerator(db *badger.DB, story *stories.Story, storyItem *hnapi.St
 	// Write buffer contents to file on disk
 	if story != nil {
 		err = pdfg.WriteFile(pdfPath + strconv.Itoa(story.Id) + ".pdf")
-		if err != nil {
-			log.Fatal("PDF Generator, Error writing pdf", err)
-			return
-		}
 	} else if storyItem != nil {
 		err = pdfg.WriteFile(pdfPath + strconv.Itoa(storyItem.ID) + ".pdf")
-		if err != nil {
-			log.Fatal("PDF Generator, Error writing pdf", err)
-			return
-		}
 	} else if commentItem != nil {
 		err = pdfg.WriteFile(pdfPath + strconv.Itoa(commentItem.ID) + ".pdf")
-		if err != nil {
-			log.Fatal("PDF Generator, Error writing pdf", err)
-			return
-		}
+	}
+
+	if err != nil {
+		log.Fatal("PDF Generator, Error writing pdf", err)
+		return
 	}
 
 	log.Println("PDF Generator, Creating pdf file: Success")
