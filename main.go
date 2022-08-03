@@ -113,7 +113,7 @@ func OperationsMode(db *badger.DB, mode string) {
 				wg.Done()
 			}()
 
-			fmt.Println("Enter the categories for filtering separted by a comma, e.g. Tech,Climate,Gaming:")
+			fmt.Println("Enter the categories for filtering separated by a comma, e.g. Tech,Climate,Gaming:")
 			var categories []string
 			var categoryParam string
 
